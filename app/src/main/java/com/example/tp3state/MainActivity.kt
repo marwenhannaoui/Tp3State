@@ -85,6 +85,7 @@ fun WaterDiplay(count: Int) {
 fun WellnessTaskItem(
     task:WellnessTask,
     onCheckChange:(WellnessTask)->Unit,
+    onDelete:(WellnessTask) ->Unit,
     modifier: Modifier = Modifier
 ) {
 //    var checkedState = remember { mutableStateOf(false) }
@@ -102,7 +103,7 @@ fun WellnessTaskItem(
                 checked = task.checkedState.value,
         onCheckedChange = {onCheckChange(task)}
         )
-        IconButton(onClick = {  }) {
+        IconButton(onClick = { onDelete(task) }) {
             Icon(Icons.Filled.Close, contentDescription = "Close")
         }
     }
@@ -112,6 +113,7 @@ fun WellnessTaskItem(
 fun WellnessTasksList(
     list: List<WellnessTask>,
     oncheckChange:(WellnessTask)->Unit,
+    onDelete:(WellnessTask) -> Unit,
     modifier: Modifier = Modifier
 ) { LazyColumn(
     modifier = modifier
@@ -120,7 +122,7 @@ fun WellnessTasksList(
         items = list,
         key = { task -> task.id })
     { task ->
-        WellnessTaskItem( task = task, onCheckChange = { oncheckChange(task) } )
+        WellnessTaskItem( task = task, onCheckChange = { oncheckChange(task) }, onDelete = {onDelete(task)} )
     }
 }
 }
@@ -136,6 +138,13 @@ class WellnessViewModel: ViewModel()
             it.checkedState.value=!it.checkedState.value
         }
     }
+
+
+    fun onDelete(item: WellnessTask){
+        _statelist.toList().find { it.id==item.id }?.let{
+            _statelist.remove(item)
+        }
+    }
 }
 private fun getWellnessTasks() = List(30) { i -> WellnessTask(i, "Task # $i") }
 @Preview(showBackground = true)
@@ -146,7 +155,10 @@ fun WellnessScreen(
     val wellnessViewModel=WellnessViewModel()
     Column(modifier = modifier) { WellnessTasksList(
         list = wellnessViewModel.statelist,
-        oncheckChange =  {wellnastask->wellnessViewModel.onCheckChange(wellnastask)}       )
+        oncheckChange =  {wellnastask->wellnessViewModel.onCheckChange(wellnastask)},
+        onDelete = {wellnastask->wellnessViewModel.onDelete(wellnastask)}
+
+    )
     }
 }
 
